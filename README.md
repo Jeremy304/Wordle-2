@@ -5,9 +5,14 @@ in cmd: git clone https://github.com/Jeremy304/Wordle-2.git
 WINDOWS: gradlew.bat bootRun
 MAC/LINUX: ./gradlew bootRun
 
-Open browser: try http://localhost:8080 or http://localhost:5500
+Open browser: try "http://localhost:8080" or "http://localhost:5500"
 
 DONE 
+
+if gradlew doesn't work: 
+
+cd "C:\VSC projects\demo"                 
+        .\gradlew.bat bootRun
 
 
 
