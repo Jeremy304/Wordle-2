@@ -1,3 +1,16 @@
+TLDR:
+in cmd: git clone https://github.com/Jeremy304/Wordle-2.git
+        cd Wordle-2
+
+WINDOWS: gradlew.bat bootRun
+MAC/LINUX: ./gradlew bootRun
+
+Open browser: try http://localhost:8080 or http://localhost:5500
+
+DONE 
+
+
+
 A simple backend word game built with Spring Boot. Players attempt to guess a 6-letter target word, similar to Wordle. The game returns feedback on each guess.
 
 Tech Stack
@@ -41,8 +54,8 @@ Git
 Gradle (or use the included gradlew)
 
 1. Clone the Repo -
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-cd YOUR_REPO_NAME
+git clone https://github.com/Jeremy304/Wordle-2.git
+cd Wordle-2
 
 
 2. Run the App
@@ -69,4 +82,4 @@ Content-Type: application/json
   "guess": "planet"
 }
 
-is project is licensed under the MIT License
+Project is licensed under the MIT License
