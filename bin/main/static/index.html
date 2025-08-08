@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle 2</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      div {text-align: center;}
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      margin-top: 20px;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      letter-spacing: 3px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(to right, #ff8a00, #da1b60);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin-top: 10px;
+    }
+    
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    
+    .input-area {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    #guessInput {
+      flex: 1;
+      padding: 15px 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      text-align: center;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    #guessInput:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(106, 170, 100, 0.5);
+    }
+    
+    #submitBtn, #restartBtn {
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    #submitBtn {
+      background: linear-gradient(to right, #4CAF50, #2E7D32);
+    }
+    
+    #restartBtn {
+      background: linear-gradient(to right, #2196F3, #0D47A1);
+    }
+    
+    #submitBtn:hover, #restartBtn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    #submitBtn:hover {
+      background: linear-gradient(to right, #66BB6A, #388E3C);
+    }
+    
+    #restartBtn:hover {
+      background: linear-gradient(to right, #42A5F5, #1565C0);
+    }
+    
+    #submitBtn:active, #restartBtn:active {
+      transform: translateY(1px);
+    }
+    
+    #submitBtn:disabled {
+      background: #787c7e;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    #result {
+      min-height: 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .win {
+      background: rgba(106, 170, 100, 0.3) !important;
+      color: #aaffaa;
+    }
+    
+    .lose {
+      background: rgba(120, 124, 126, 0.3) !important;
+      color: #ff9999;
+    }
+    
+    #backend-status {
+      text-align: center;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+    
+    .connected {
+      background: rgba(106, 170, 100, 0.3);
+      color: #aaffaa;
+    }
+    
+    .disconnected {
+      background: rgba(201, 180, 88, 0.3);
+      color: #ffffaa;
+    }
+    
+    .error {
+      background: rgba(120, 124, 126, 0.3);
+      color: #ff9999;
+    }
+    
+    /* Guess history display */
+    #guessHistory {
+      margin: 30px auto;
+      max-width: 400px;
+      font-family: monospace;
+    }
+    
+    .guess-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+    
+    .letter-box {
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      border: 3px solid #444;
+      font-weight: bold;
+      font-size: 24px;
+      text-transform: uppercase;
+      user-select: none;
+      border-radius: 8px;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .correct {
+      background-color: #6aaa64;
+      color: white;
+      border-color: #6aaa64;
+      transform: scale(1.05);
+    }
+    
+    .misplaced {
+      background-color: #c9b458;
+      color: white;
+      border-color: #c9b458;
+      transform: scale(1.05);
+    }
+    
+    .incorrect {
+      background-color: #787c7e;
+      color: white;
+      border-color: #787c7e;
+    }
+    
+    .keyboard {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .keyboard-row {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .key {
+      width: 40px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #818384;
+      color: white;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    
+    .key:hover {
+      background: #6d6e6f;
+    }
+    
+    .key.correct {
+      background: #6aaa64;
+    }
+    
+    .key.misplaced {
+      background: #c9b458;
+    }
+    
+    .key.incorrect {
+      background: #3a3a3c;
+    }
+    
+    .instructions {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+    
+    .instructions h3 {
+      margin-bottom: 15px;
+      color: #ff8a00;
+    }
+    
+    .instructions ul {
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    
+    .key-color {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin: 0 5px;
+    }
+    
+    .color-correct {
+      background: #6aaa64;
+    }
+    
+    .color-misplaced {
+      background: #c9b458;
+    }
+    
+    .color-incorrect {
+      background: #787c7e;
+    }
+    
+    .button-container {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .word-count {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      opacity: 0.8;
+    }
+    
+    @media (max-width: 500px) {
+      .container {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      .input-area {
+        flex-direction: column;
+      }
+      
+      #submitBtn, #restartBtn {
+        padding: 15px;
+      }
+      
+      .letter-box {
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 20px;
+      }
+      
+      .key {
+        width: 30px;
+        height: 40px;
+        font-size: 0.9rem;
+      }
+      
+      .button-container {
+        flex-direction: column;
+      }
+    }
+  </style>
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header>
+      <h1>WORDLE 2</h1>
+      <p class="subtitle">Guess the six-letter word in six tries</p>
+      <div class="word-count">Using a dictionary of ~256 words</div>
+    </header>
+    
+    <div class="game-info">
+      <div>Guesses: <span id="guessCount">0/6</span></div>
+     <!-- <div>Status: <span id="gameStatus">Playing</span></div> -->
+    </div>
+    
+    <div class="input-area">
+      <input type="text" id="guessInput" placeholder="" maxlength="6" autofocus>
+      <div class="button-container">
+        <button id="submitBtn">Submit</button>
+        <button id="restartBtn">Restart</button>
+      </div>
+  </div>
+
+
+  <script>
+    const MAX_GUESSES = 6;
+    let guessesMade = 0;
+    let gameOver = false;
+    let letterStatus = {};
+    const API_BASE_URL = "http://localhost:8080/game";
+
+    // Initialize keyboard
+    function initKeyboard() {
+      document.querySelectorAll('.key').forEach(key => {
+        key.addEventListener('click', () => {
+          const letter = key.getAttribute('data-key');
+          const input = document.getElementById('guessInput');
+          if (input.value.length < 6) {
+            input.value += letter;
+          }
+        });
+      });
+    }
+
+    // Update keyboard colors
+    function updateKeyboard() {
+      for (const [letter, status] of Object.entries(letterStatus)) {
+        const key = document.querySelector(.key[data-key="${letter}"]);
+        if (key) {
+          key.classList.remove('correct', 'misplaced', 'incorrect');
+          if (status === 'correct') {
+            key.classList.add('correct');
+          } else if (status === 'misplaced') {
+            key.classList.add('misplaced');
+          } else if (status === 'incorrect') {
+            key.classList.add('incorrect');
+          }
+        }
+      }
+    }
+
+    // Parse feedback string and return array of statuses
+    function parseFeedback(feedbackStr) {
+      let chars = feedbackStr.replace(/\s/g, '').split('');
+      return chars.map(char => {
+        if (char === '_') {
+          return 'incorrect';
+        } else if (/[A-Z]/.test(char)) {
+          return 'correct';
+        } else if (/[a-z]/.test(char)) {
+          return 'misplaced';
+        } else {
+          return 'incorrect';
+        }
+      });
+    }
+
+    function displayGuess(guess, feedbackStr) {
+      const historyDiv = document.getElementById('guessHistory');
+      const guessRow = document.createElement('div');
+      guessRow.classList.add('guess-row');
+      
+      const statuses = parseFeedback(feedbackStr);
+      const letters = guess.toUpperCase().split('');
+      
+      for (let i = 0; i < letters.length; i++) {
+        const box = document.createElement('div');
+        box.classList.add('letter-box', statuses[i]);
+        box.textContent = letters[i];
+        guessRow.appendChild(box);
+        
+        const letter = letters[i];
+        if (!letterStatus[letter] || 
+            (statuses[i] === 'correct' && letterStatus[letter] !== 'correct') ||
+            (statuses[i] === 'misplaced' && letterStatus[letter] === 'incorrect')) {
+          letterStatus[letter] = statuses[i];
+        }
+      }
+      
+      historyDiv.appendChild(guessRow);
+      updateKeyboard();
+    }
+
+    
+    async function submitGuess() {
+      if (gameOver) return;
+
+      const input = document.getElementById('guessInput');
+      const guess = input.value.trim();
+
+      if (guess.length !== 6) {
+        document.getElementById('result').textContent = "Please enter a 6-letter word.";
+        document.getElementById('result').className = "";
+        return;
+      }
+
+      try {
+  const response = await fetch(${API_BASE_URL}/guess?guess=${encodeURIComponent(guess)}, {
+    method: 'POST',
+    credentials: 'include'  // Important for session cookies
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error);
+  }
+
+  const result = await response.json();
+
+  // Display feedback
+  displayGuess(result.guess, result.feedback);
+
+  guessesMade++;
+  document.getElementById('guessCount').textContent = ${guessesMade}/${MAX_GUESSES};
+  input.value = "";
+  input.focus();
+
+  if (result.correct === 6) {
+    document.getElementById('result').textContent = 🎉 You won!;
+    document.getElementById('result').className = "win";
+    document.getElementById('gameStatus').textContent = "Won!";
+    document.getElementById('gameStatus').style.color = "#6aaa64";
+    gameOver = true;
+  } else if (guessesMade >= MAX_GUESSES) {
+    const targetResponse = await fetch(${API_BASE_URL}/target, {
+      credentials: 'include'
+    });
+    const targetText = await targetResponse.text();
+
+    document.getElementById('result').textContent = Game over! ${targetText};
+    document.getElementById('result').className = "lose";
+    document.getElementById('gameStatus').textContent = "Lost";
+    document.getElementById('gameStatus').style.color = "#ff9999";
+    gameOver = true;
+  } else {
+    document.getElementById('result').textContent =
+      Guess ${guessesMade} of ${MAX_GUESSES}: ${result.correct} correct, ${result.misplaced} misplaced;
+    document.getElementById('result').className = "";
+  }
+
+  if (gameOver) {
+    input.disabled = true;
+    document.getElementById('submitBtn').disabled = true;
+  }
+
+} catch (error) {
+  document.getElementById('result').textContent = "Error: " + error.message;
+  document.getElementById('result').className = "";
+  console.error('Error:', error);
+}
+
+    // Initialize the game
+    window.onload = function() {
+      // Initialize session
+      fetch(${API_BASE_URL}/start, {
+        credentials: 'include'
+      });
+      
+      initKeyboard();
+      
+      document.getElementById('submitBtn').addEventListener('click', submitGuess);
+      document.getElementById('guessInput').addEventListener('keydown', function(event) {
+        if(event.key === 'Enter') {
+          submitGuess();
+        }
+      });
+      
+      document.getElementById('guessInput').addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+      });
+    };
+  </script>
+</body>
+</html>

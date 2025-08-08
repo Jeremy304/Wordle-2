@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wordle 2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #121213;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 5px;
+    }
+
+    .cell {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #3a3a3c;
+      font-size: 24px;
+      text-transform: uppercase;
+      font-weight: bold;
+      background-color: #121213;
+      color: white;
+      transition: background-color 0.3s ease;
+      cursor: default;
+    }
+
+    /* Shake animation */
+    @keyframes shake {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20%,
+      60% {
+        transform: translateX(-5px);
+      }
+
+      40%,
+      80% {
+        transform: translateX(5px);
+      }
+    }
+
+    .shake {
+      animation: shake 0.4s;
+    }
+
+    .correct {
+      background-color: #6aaa64;
+    }
+
+    .misplaced {
+      background-color: #c9b458;
+    }
+
+    .incorrect {
+      background-color: #787c7e;
+    }
+
+    .keyboard {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      max-width: 500px;
+    }
+
+    .keyboard button {
+      padding: 12px;
+      font-size: 20px;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #444; /* Darker gray */
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+
+    .keyboard .correct {
+      background-color: #6aaa64;
+      color: white;
+    }
+
+    .keyboard .misplaced {
+      background-color: #c9b458;
+      color: white;
+    }
+
+    .keyboard .incorrect {
+      background-color: #333; /* Even darker for letters not in word */
+      color: white;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Wordle 2</h1>
+  <div class="board" id="board"></div>
+  <div class="keyboard" id="keyboard"></div>
+
+  <script>
+    const board = document.getElementById('board');
+    const keyboard = document.getElementById('keyboard');
+    const rows = 6;
+    const cols = 6;
+    let currentGuess = "";
+    let guessesMade = 0;
+    const letterStatus = {};
+
+    // Build board
+    for (let r = 0; r < rows; r++) {
+      const row = document.createElement('div');
+      row.classList.add('row');
+      for (let c = 0; c < cols; c++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.id = `cell-${r}-${c}`;
+        row.appendChild(cell);
+      }
+      board.appendChild(row);
+    }
+
+    // Build keyboard
+    const keys = 'QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
+    keys.forEach(key => {
+      const button = document.createElement('button');
+      button.textContent = key;
+      button.setAttribute('data-key', key);
+      button.addEventListener('click', () => handleKey(key));
+      keyboard.appendChild(button);
+    });
+
+    // Add enter and backspace buttons
+    const enterButton = document.createElement('button');
+    enterButton.textContent = 'Enter';
+    enterButton.addEventListener('click', submitGuess);
+    keyboard.appendChild(enterButton);
+
+    const backspaceButton = document.createElement('button');
+    backspaceButton.textContent = '←';
+    backspaceButton.addEventListener('click', () => handleKey('BACKSPACE'));
+    keyboard.appendChild(backspaceButton);
+
+    function handleKey(key) {
+      if (key === 'BACKSPACE') {
+        currentGuess = currentGuess.slice(0, -1);
+      } else if (currentGuess.length < cols) {
+        currentGuess += key;
+      }
+      updateCurrentRow();
+    }
+
+    function updateCurrentRow() {
+      for (let i = 0; i < cols; i++) {
+        const cell = document.getElementById(`cell-${guessesMade}-${i}`);
+        cell.textContent = currentGuess[i] ? currentGuess[i].toUpperCase() : '';
+      }
+    }
+
+    function submitGuess() {
+      if (currentGuess.length !== cols) return;
+      fetch('http://localhost:8080/game/guess', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({ guess: currentGuess })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.feedback.length === 1 && data.feedback[0].startsWith("Invalid guess")) {
+            // Shake animation on current row for invalid word
+            shakeCurrentRow();
+          } else {
+            displayGuess(data.guess, data.feedback);
+            currentGuess = "";
+            guessesMade++;
+          }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function shakeCurrentRow() {
+      for (let i = 0; i < cols; i++) {
+        const cell = document.getElementById(`cell-${guessesMade}-${i}`);
+        if (!cell) continue;
+        cell.classList.add('shake');
+        // Remove class after animation ends to allow future shakes
+        cell.addEventListener('animationend', function handler() {
+          cell.classList.remove('shake');
+          cell.removeEventListener('animationend', handler);
+        });
+      }
+    }
+
+    function displayGuess(guess, feedback) {
+      const row = guessesMade;
+      for (let i = 0; i < cols; i++) {
+        const cell = document.getElementById(`cell-${row}-${i}`);
+        if (!cell) continue;
+
+        // Clear previous classes except 'cell'
+        cell.className = 'cell';
+
+        // Show letter immediately
+        cell.textContent = guess[i].toUpperCase();
+
+        const status = feedback[i]?.toLowerCase?.().trim() || 'incorrect';
+        cell.classList.add(status);
+
+        // Update keyboard keys color
+        const letter = guess[i].toUpperCase();
+        const keyButton = document.querySelector(`.keyboard button[data-key="${letter}"]`);
+        if (keyButton) {
+          const currentStatus = letterStatus[letter] || '';
+          if (
+            status === 'correct' ||
+            (status === 'misplaced' && currentStatus !== 'correct') ||
+            (status === 'incorrect' && !currentStatus)
+          ) {
+            letterStatus[letter] = status;
+            keyButton.classList.remove('correct', 'misplaced', 'incorrect');
+            keyButton.classList.add(status);
+          }
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
