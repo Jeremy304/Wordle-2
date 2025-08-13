@@ -10,7 +10,7 @@ import java.util.*;
 public class WordGameService {
     private static final int WORD_LENGTH = 6;
     private static final String TARGET_WORD_FILE = "words.txt";
-    private static final String VALIDATION_WORD_FILE = "wordbank.txt";
+    private static final String VALIDATION_WORD_FILE = "wordBank.txt";
 
     private final String targetWord;
     private final Set<String> validWords;
