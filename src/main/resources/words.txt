@@ -9,9 +9,7 @@ jumper
 quaint
 zephyr
 wraith
-Yearly
-
-Zephyr
+yearly
 
 Author
 
@@ -47,15 +45,15 @@ Puzzle
 
 Quarry
 
-Robust
+robust
 
-Sphere
+sphere
 
-Thrive
+thrive
 
-Unfold
+unfold
 
-Velvet
+velvet
 
 Warden
 
@@ -75,11 +73,11 @@ Exempt
 
 Flight
 
-Gravel
+gravel
 
-Harbor
+harbor
 
-Inject
+inject
 
 kernel
 
@@ -87,16 +85,16 @@ lounge
 
 mentor
 
-Novice
+novice
 
-Occupy
+occupy
 
-Parcel
+parcel
 
-Quiver
+quiver
 
-Resort
-Scream
+resort
+scream
 tissue
 unveil
 vortex
@@ -1121,4 +1119,6 @@ wordle
 crispy
 twisty
 marlin
-
+slinky
+traces
+gnarly
