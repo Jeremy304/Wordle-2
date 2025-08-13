@@ -11,7 +11,7 @@ import java.util.*;
 @Service
 public class WordBankService {
     private static final int WORD_LENGTH = 6;
-    private static final String WORD_FILE = "wordbank.txt";
+    private static final String WORD_FILE = "wordBank.txt";
 
     private final Set<String> validWords;
     private final String targetWord;
