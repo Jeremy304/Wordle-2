@@ -15,6 +15,7 @@ cd "C:\VSC projects\demo"
         .\gradlew.bat bootRun
 
 
+![wordle2preview](https://github.com/user-attachments/assets/0cc9d2ec-4e70-4fd5-b03f-e8d184d42130)
 
 A simple backend word game built with Spring Boot. Players attempt to guess a 6-letter target word, similar to Wordle. The game returns feedback on each guess.
 
