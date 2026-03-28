@@ -12,20 +12,30 @@ public class WordGameService {
     private static final String TARGET_WORD_FILE = "words.txt";
     private static final String VALIDATION_WORD_FILE = "wordBank.txt";
 
-    private final String targetWord;
+    private String targetWord;  // no longer final
     private final Set<String> validWords;
+    private final List<String> targetWords;
     private int guessesMade = 0;
+    private final Random random = new Random();
 
     public WordGameService() {
-        List<String> targets = loadWordsFromFile(TARGET_WORD_FILE);
+        this.targetWords = loadWordsFromFile(TARGET_WORD_FILE);
         this.validWords = new HashSet<>(loadWordsFromFile(VALIDATION_WORD_FILE));
+        startNewGame();  // initialize the first game
+    }
 
-        if (targets.isEmpty()) {
-            targets = List.of("banana");
+    /**
+     * Starts a new game by selecting a new random target word
+     * and resetting the number of guesses.
+     */
+    public void startNewGame() {
+        if (targetWords.isEmpty()) {
+            targetWord = "banana";
+        } else {
+            targetWord = targetWords.get(random.nextInt(targetWords.size()));
         }
-
-        Random random = new Random();
-        this.targetWord = targets.get(random.nextInt(targets.size()));
+        guessesMade = 0;
+        System.out.println("New target word: " + targetWord); // debug
     }
 
     public String getTargetWord() {
@@ -83,11 +93,11 @@ public class WordGameService {
         }
 
         return new WordGameResult(
-            guess,
-            feedback,
-            correct,
-            misplaced,
-            incorrect
+                guess,
+                feedback,
+                correct,
+                misplaced,
+                incorrect
         );
     }
 

@@ -18,11 +18,14 @@ public class GameController {
         this.game = game;
     }
 
+    // Start or reset a new game
     @GetMapping("/start")
     public String startGame() {
-        return "Game started. Start guessing!";
+        game.startNewGame();  // pick a new random word
+        return "New game started. Start guessing!";
     }
 
+    // Submit a guess
     @PostMapping("/guess")
     public WordGameResult makeGuess(@RequestParam String guess) {
         System.out.println("Received guess: " + guess);
@@ -50,6 +53,7 @@ public class GameController {
         }
     }
 
+    // Reveal current target word (for debugging)
     @GetMapping("/target")
     public String revealWord() {
         return "Target word is: " + game.getTargetWord();
